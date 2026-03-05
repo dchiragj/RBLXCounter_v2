@@ -39,7 +39,7 @@ const SplashScreen = ({ navigation }) => {
                 <Image
                     source={require('../../assets/images/splash.png')}
                     style={styles.logo}
-                    resizeMode="contain"
+                    resizeMode="cover"
                 />
             </Animated.View>
         </View>
@@ -49,15 +49,15 @@ const SplashScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     logoContainer: {
-        alignItems: 'center',
+        flex: 1,
+        width: '100%',
+        height: '100%',
     },
     logo: {
-        width: 250,
-        height: 250,
+        width: '100%',
+        height: '100%',
     },
 });
 

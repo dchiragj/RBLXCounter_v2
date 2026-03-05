@@ -5,7 +5,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -13,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SelectCalculator = ({ navigation }) => {
 

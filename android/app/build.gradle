@@ -60,6 +60,12 @@ react {
 def enableProguardInReleaseBuilds = true
 
 /**
+ * Set this to true to create four separate APKs instead of one,
+ * allowing you to ship a separate APK for each architecture.
+ */
+def enableSeparateBuildPerCPUArchitecture = true
+
+/**
  * The preferred build flavor of JavaScriptCore (JSC)
  *
  * For example, to use the international variant, you can use:
@@ -84,6 +90,29 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+    }
+
+    splits {
+        abi {
+            enable enableSeparateBuildPerCPUArchitecture
+            reset()
+            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            universalApk false
+        }
+    }
+
+    // applicationVariants are e.g. debug, release
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            // For each separate APK per architecture, set a unique version code as described here:
+            // https://developer.android.com/studio/build/configure-apk-splits.html
+            def versionCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+            if (abi != null) {  // null for the universal-debug, universal-release variants
+                output.versionCodeOverride =
+                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -119,7 +148,7 @@ dependencies {
 }
 
 project.ext.vectoricons = [
-    iconFontNames: [ 'Ionicons.ttf', 'MaterialIcons.ttf', 'MaterialCommunityIcons.ttf' ]
+    iconFontNames: [ 'Ionicons.ttf' ]
 ]
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

@@ -1,19 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
+
     Animated,
     Dimensions,
     Image,
+    Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
-import PremiumButton from '../../components/PremiumButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
@@ -22,7 +24,24 @@ const { width } = Dimensions.get('window');
 const LuckyScratch = ({ navigation }) => {
     const [isScratched, setIsScratched] = useState(false);
     const [reward, setReward] = useState(0);
+    const [coins, setCoins] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
     const scratchAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        loadCoins();
+    }, []);
+
+    const loadCoins = async () => {
+        try {
+            const savedCoins = await AsyncStorage.getItem("user_coins");
+            if (savedCoins) {
+                setCoins(parseInt(savedCoins));
+            }
+        } catch (error) {
+            console.log("Error loading coins:", error);
+        }
+    };
 
     const rewards = [50, 100, 250, 500, 750, 1000];
 
@@ -37,7 +56,10 @@ const LuckyScratch = ({ navigation }) => {
             toValue: 0,
             duration: 1000,
             useNativeDriver: true,
-        }).start(() => setIsScratched(true));
+        }).start(() => {
+            setIsScratched(true);
+            setTimeout(() => setModalVisible(true), 500);
+        });
     };
 
     const handleBackPress = async () => {
@@ -54,16 +76,16 @@ const LuckyScratch = ({ navigation }) => {
     };
 
     const handleClaim = async () => {
+        setModalVisible(false);
         const url = getRedirectUrl();
         try {
             await InAppBrowser.open(url, {
                 dismissButtonStyle: 'close',
                 preferredBarTintColor: THEME.colors.primary,
             });
-            // Here you would normally update the user's coins in AsyncStorage
-            navigation.goBack();
+            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
         } catch (e) {
-            navigation.goBack();
+            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
         }
     };
 
@@ -72,16 +94,24 @@ const LuckyScratch = ({ navigation }) => {
             <StatusBar barStyle="light-content" />
             <LinearGradient colors={THEME.gradients.background} style={StyleSheet.absoluteFill} />
 
-            <View style={styles.header}>
+            <LinearGradient
+                colors={['#1a1a2e', 'rgba(26, 26, 46, 0.8)']}
+                style={styles.header}
+            >
                 <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
                     <Ionicons name="chevron-back" size={28} color="#FFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Lucky Scratch</Text>
-                <View style={styles.coinContainer}>
+                <LinearGradient
+                    colors={['#f78c2c', '#e94057']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.coinContainer}
+                >
                     <Image source={require('../../assets/images/coin.png')} style={styles.coinIcon} />
-                    <Text style={styles.coinText}>278</Text>
-                </View>
-            </View>
+                    <Text style={styles.coinText}>{coins}</Text>
+                </LinearGradient>
+            </LinearGradient>
 
             <View style={styles.content}>
                 <Text style={styles.instruction}>Scratch the card to reveal your prize!</Text>
@@ -112,30 +142,17 @@ const LuckyScratch = ({ navigation }) => {
                                 onPress={handleScratch}
                                 style={styles.scratchTouch}
                             >
-                                <LinearGradient
-                                    colors={['#8E2DE2', '#4A00E0']}
-                                    style={styles.scratchGradient}
-                                >
-                                    <View style={styles.scratchPattern}>
-                                        {[...Array(6)].map((_, i) => (
-                                            <View key={i} style={styles.patternLine} />
-                                        ))}
-                                    </View>
-                                    <Ionicons name="sparkles" size={40} color="rgba(255,255,255,0.4)" />
-                                    <Text style={styles.scratchText}>TAP TO SCRATCH</Text>
-                                </LinearGradient>
+                                <Image
+                                    source={require('../../assets/images/lucky_scratch_img.png')}
+                                    style={styles.scratchImage}
+                                    resizeMode="stretch"
+                                />
                             </TouchableOpacity>
                         </Animated.View>
                     )}
                 </View>
 
-                {isScratched ? (
-                    <PremiumButton
-                        title="CLAIM REWARD"
-                        onPress={handleClaim}
-                        style={styles.claimButton}
-                    />
-                ) : (
+                {!isScratched && (
                     <TouchableOpacity
                         style={styles.promoContainer}
                         onPress={() => InAppBrowser.open(getRedirectUrl())}
@@ -148,6 +165,27 @@ const LuckyScratch = ({ navigation }) => {
                     </TouchableOpacity>
                 )}
             </View>
+
+            <Modal transparent visible={modalVisible} animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalBox}>
+                        <View style={styles.rewardIconContainer}>
+                            <Image source={require('../../assets/images/ic_daily_rbx.png')} style={styles.trofee} resizeMode="contain" />
+                            <Text style={styles.rewardNumber}>{reward}</Text>
+                        </View>
+                        <Text style={styles.congratsDescription}>
+                            Congratulations ! {reward} RBX Coins are added to your virtual balance.
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.okayButton}
+                            onPress={handleClaim}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.okayButtonText}>Okay</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Tip Card */}
             <View style={styles.tipCard}>
@@ -187,7 +225,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: THEME.spacing.xl,
+        // padding: THEME.spacing.xl,
     },
     instruction: {
         color: THEME.colors.textSecondary,
@@ -263,15 +301,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         transform: [{ rotate: '45deg' }],
     },
+    scratchImage: {
+        width: '100%',
+        height: '100%',
+    },
     coinContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        paddingHorizontal: 18,
+        paddingVertical: 10,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.3)',
     },
     coinIcon: {
         width: 18,
@@ -288,14 +327,73 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     promoContainer: {
-        marginTop: 40,
-        width: width * 0.8,
-        borderRadius: THEME.borderRadius.lg,
-        overflow: 'hidden',
+        width: '100%',
+        alignSelf: 'center',
+        justifyContent: 'center',
+        marginTop: 20
     },
     promoImage: {
-        width: '100%',
+        width: width,
+        height: 270,
+        borderRadius: 5,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: THEME.spacing.xl,
+    },
+    modalBox: {
+        width: '95%',
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 30,
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#FFF',
+        backgroundColor: '#1E0B36', // Dark purple background
+    },
+    rewardIconContainer: {
+        width: 180,
         height: 180,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    trofee: {
+        width: '100%',
+        height: '100%',
+    },
+    rewardNumber: {
+        position: 'absolute',
+        bottom: 45,
+        color: '#FFF',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    congratsDescription: {
+        color: '#FFF',
+        fontSize: 15,
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 30,
+        fontWeight: '500',
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    okayButton: {
+        backgroundColor: '#A020F0', // Vibrant purple
+        paddingVertical: 15,
+        paddingHorizontal: 60,
+        borderRadius: 40,
+        width: '100%',
+        alignItems: 'center',
+    },
+    okayButtonText: {
+        color: '#FFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     tipCard: {
         margin: THEME.spacing.lg,

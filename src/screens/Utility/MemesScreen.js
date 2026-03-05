@@ -5,7 +5,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     ScrollView,
     Share,
     Image,
@@ -15,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MEME_DATA = [
     { title: "Robux Dreamer", subtitle: "When you calculate how many chores it'll take to afford 400 Robux." },

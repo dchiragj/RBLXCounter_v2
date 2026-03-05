@@ -5,7 +5,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     ScrollView,
     Image,
     Dimensions,
@@ -16,6 +15,7 @@ import { THEME } from '../../theme';
 import PremiumButton from '../../components/PremiumButton';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 

@@ -5,10 +5,11 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     ScrollView,
     TextInput,
     Modal,
+    Image,
+    Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -16,8 +17,11 @@ import { THEME } from '../../theme';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import PremiumButton from '../../components/PremiumButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
+const { width } = Dimensions.get('window');
 
 const BCRobuxAmount = ({ route, navigation }) => {
+
     const { type } = route.params;
     const [amount, setAmount] = useState('');
     const [error, setError] = useState(false);
@@ -93,12 +97,19 @@ const BCRobuxAmount = ({ route, navigation }) => {
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.iconContainer}>
-                    <LinearGradient
-                        colors={['rgba(142, 45, 226, 0.3)', 'rgba(74, 0, 224, 0.1)']}
-                        style={styles.iconGlow}
-                    >
-                        <Ionicons name="calculator" size={60} color={THEME.colors.primary} />
-                    </LinearGradient>
+                    {(type === 'dollarToRbx' || type === 'rbxToDollar') ? (
+                        <Image
+                            source={require('../../assets/images/calc_img.png')}
+                            style={styles.calcImage}
+                            resizeMode="contain"
+                        />
+                    ) : (
+                        <Image
+                            source={require('../../assets/images/calcuimage.png')}
+                            style={styles.calcImage}
+                            resizeMode="contain"
+                        />
+                    )}
                 </View>
 
                 <View style={styles.inputCard}>
@@ -128,7 +139,13 @@ const BCRobuxAmount = ({ route, navigation }) => {
                         onPress={handleCountNow}
                         style={{ marginTop: THEME.spacing.lg }}
                     />
+
                 </View>
+                <Image
+                    source={require('../../assets/images/big_ad_img4.png')}
+                    style={styles.promoImage}
+                    resizeMode="cover"
+                />
             </ScrollView>
 
             <Modal transparent visible={showModal} animationType="fade">
@@ -198,6 +215,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(142, 45, 226, 0.4)',
     },
+    calcImage: {
+        width: 160,
+        height: 160,
+    },
     inputCard: {
         width: '100%',
         padding: THEME.spacing.lg,
@@ -233,6 +254,12 @@ const styles = StyleSheet.create({
         color: THEME.colors.error,
         fontSize: 12,
         marginLeft: 4,
+    },
+    promoImage: {
+        width: width,
+        height: 270,
+        borderRadius: 5,
+        marginTop: THEME.spacing.xl,
     },
     modalOverlay: {
         flex: 1,

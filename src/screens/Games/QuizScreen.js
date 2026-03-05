@@ -5,15 +5,15 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     Animated,
     Dimensions,
     Modal,
+    Image,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
-import PremiumButton from '../../components/PremiumButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
@@ -145,7 +145,8 @@ const QuizScreen = ({ navigation }) => {
             setIsAnswered(false);
             setShowResultModal(false);
         } else {
-            navigation.goBack();
+            const reward = score * 5; // e.g., 5 coins per correct answer
+            navigation.navigate('Dashboard', { spinReward: reward });
         }
     };
 
@@ -167,7 +168,10 @@ const QuizScreen = ({ navigation }) => {
             <StatusBar barStyle="light-content" />
             <LinearGradient colors={THEME.gradients.background} style={StyleSheet.absoluteFill} />
 
-            <View style={styles.header}>
+            <LinearGradient
+                colors={['#1a1a2e', 'rgba(26, 26, 46, 0.8)']}
+                style={styles.header}
+            >
                 <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
                     <Ionicons name="chevron-back" size={28} color="#FFF" />
                 </TouchableOpacity>
@@ -175,7 +179,15 @@ const QuizScreen = ({ navigation }) => {
                 <View style={styles.scoreBadge}>
                     <Text style={styles.scoreText}>{score}/{currentQuestions.length}</Text>
                 </View>
-            </View>
+            </LinearGradient>
+
+            {/* <View style={styles.bannerContainer}>
+                <Image
+                    source={require('../../assets/images/quize_time.png')}
+                    style={styles.bannerImage}
+                    resizeMode="contain"
+                />
+            </View> */}
 
             <View style={styles.levelProgressContainer}>
                 <Text style={styles.levelText}>Level {currentLevel}</Text>
@@ -218,20 +230,28 @@ const QuizScreen = ({ navigation }) => {
 
             <Modal transparent visible={showResultModal} animationType="fade">
                 <View style={styles.modalOverlay}>
-                    <LinearGradient
-                        colors={['#1A1A2E', '#16213E']}
-                        style={styles.modalBox}
-                    >
-                        <Ionicons name="trophy" size={80} color={THEME.colors.secondary} />
-                        <Text style={styles.modalTitle}>Level {currentLevel} Complete!</Text>
-                        <Text style={styles.modalScore}>Score: {score}/{currentQuestions.length}</Text>
-
-                        <PremiumButton
-                            title={currentLevel < Object.keys(QUIZ_DATA).length ? "Next Level" : "Finish Quiz"}
+                    <View style={styles.modalBox}>
+                        <View style={styles.rewardIconContainer}>
+                            <Image source={require('../../assets/images/ic_daily_rbx.png')} style={styles.trofee} resizeMode="contain" />
+                            {currentLevel === Object.keys(QUIZ_DATA).length && (
+                                <Text style={styles.rewardNumber}>{score * 5}</Text>
+                            )}
+                        </View>
+                        <Text style={styles.congratsDescription}>
+                            {currentLevel < Object.keys(QUIZ_DATA).length
+                                ? `Level ${currentLevel} Complete!\nYou scored ${score}/${currentQuestions.length}`
+                                : `Quiz Finished!\n${score * 5} RBX Coins are added to your virtual balance.`}
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.okayButton}
                             onPress={startNextLevel}
-                            style={{ width: '100%' }}
-                        />
-                    </LinearGradient>
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.okayButtonText}>
+                                {currentLevel < Object.keys(QUIZ_DATA).length ? "Next Level" : "Okay"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </Modal>
         </SafeAreaView>
@@ -247,6 +267,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: THEME.spacing.md,
+    },
+    bannerContainer: {
+        width: '100%',
+        height: 120,
+        marginVertical: THEME.spacing.md,
+        alignItems: 'center',
+    },
+    bannerImage: {
+        width: '90%',
+        height: '100%',
     },
     backButton: {
         width: 40,
@@ -346,23 +376,55 @@ const styles = StyleSheet.create({
         padding: THEME.spacing.xl,
     },
     modalBox: {
-        width: '100%',
-        borderRadius: THEME.borderRadius.xl,
-        padding: THEME.spacing.xl,
+        width: '95%',
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 30,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 2,
+        borderColor: '#FFF',
+        backgroundColor: '#1E0B36', // Dark purple background
     },
-    modalTitle: {
+    rewardIconContainer: {
+        width: 180,
+        height: 180,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    trofee: {
+        width: '100%',
+        height: '100%',
+    },
+    rewardNumber: {
+        position: 'absolute',
+        bottom: 45,
         color: '#FFF',
         fontSize: 24,
         fontWeight: 'bold',
-        marginTop: THEME.spacing.lg,
     },
-    modalScore: {
-        color: THEME.colors.textSecondary,
-        fontSize: 18,
-        marginVertical: THEME.spacing.lg,
+    congratsDescription: {
+        color: '#FFF',
+        fontSize: 16,
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: 30,
+        fontWeight: '500',
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    okayButton: {
+        backgroundColor: '#A020F0', // Vibrant purple
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 40,
+        width: '100%',
+        alignItems: 'center',
+    },
+    okayButtonText: {
+        color: '#FFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
 });
 

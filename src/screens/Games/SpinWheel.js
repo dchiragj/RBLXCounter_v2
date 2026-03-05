@@ -1,22 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     StatusBar,
-    SafeAreaView,
     Animated,
     Dimensions,
     Image,
     Modal,
+    Pressable,
+    ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import PremiumButton from '../../components/PremiumButton';
 import { getRedirectUrl } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -24,7 +27,23 @@ const SpinWheel = ({ navigation }) => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [reward, setReward] = useState(0);
+    const [coins, setCoins] = useState(0);
     const spinAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        loadCoins();
+    }, []);
+
+    const loadCoins = async () => {
+        try {
+            const savedCoins = await AsyncStorage.getItem("user_coins");
+            if (savedCoins) {
+                setCoins(parseInt(savedCoins));
+            }
+        } catch (error) {
+            console.log("Error loading coins:", error);
+        }
+    };
 
     const SPIN_RESULTS = ['79', '137', '195', '87', '699', '475', '400', '777', '125', '67'];
 
@@ -44,10 +63,13 @@ const SpinWheel = ({ navigation }) => {
             toValue: finalValue,
             duration: 3000,
             useNativeDriver: true,
-        }).start(() => {
-            setIsSpinning(false);
-            setReward(resultValue);
-            setTimeout(() => setModalVisible(true), 500);
+        }).start(({ finished }) => {
+            if (finished) {
+                console.log("🎡 Spin finished! Result:", resultValue);
+                setReward(resultValue);
+                setModalVisible(true);
+                setIsSpinning(false);
+            }
         });
     };
 
@@ -63,6 +85,26 @@ const SpinWheel = ({ navigation }) => {
             navigation.goBack();
         }
     };
+    // set the ads
+    const openAdLink = async () => {
+        const url = getRedirectUrl();
+        try {
+            await InAppBrowser.open(url, {
+                dismissButtonStyle: 'close  ',
+                preferredBarTintColor: '#f78c2c',
+                preferredControlTintColor: 'white',
+                readerMode: false,
+                showTitle: true,
+                toolbarColor: '#f78c2c',
+                secondaryToolbarColor: 'white',
+                enableUrlBarHiding: true,
+                enableDefaultShare: true,
+                forceCloseOnRedirection: false,
+            });
+        } catch (e) {
+            console.log('Browser closed or error', e);
+        }
+    };
 
     const handleClaim = async () => {
         setModalVisible(false);
@@ -72,9 +114,9 @@ const SpinWheel = ({ navigation }) => {
                 dismissButtonStyle: 'close',
                 preferredBarTintColor: THEME.colors.primary,
             });
-            navigation.goBack();
+            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
         } catch (e) {
-            navigation.goBack();
+            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
         }
     };
 
@@ -88,86 +130,118 @@ const SpinWheel = ({ navigation }) => {
             <StatusBar barStyle="light-content" />
             <LinearGradient colors={THEME.gradients.background} style={StyleSheet.absoluteFill} />
 
-            <View style={styles.header}>
+            <LinearGradient
+                colors={['#1a1a2e', 'rgba(26, 26, 46, 0.8)']}
+                style={styles.header}
+            >
                 <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
                     <Ionicons name="chevron-back" size={28} color="#FFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Spin Wheel</Text>
-                <View style={{ width: 40 }} />
-            </View>
+                <LinearGradient
+                    colors={['#f78c2c', '#e94057']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.coinContainer}
+                >
+                    <Image source={require('../../assets/images/coin.png')} style={styles.coinIcon} />
+                    <Text style={styles.coinText}>{coins}</Text>
+                </LinearGradient>
+            </LinearGradient>
+            <ScrollView>
 
-            <View style={styles.content}>
-                <View style={styles.wheelWrapper}>
-                    {/* Pointer */}
-                    <View style={styles.pointerContainer}>
-                        <Ionicons name="caret-down" size={40} color={THEME.colors.secondary} />
-                    </View>
+                <View style={styles.content}>
+                    <View style={styles.wheelWrapper}>
+                        {/* Pointer */}
+                        <View style={styles.pointerContainer}>
+                            <Image source={require('../../assets/images/spin_point.png')} style={styles.pointerImage} resizeMode="contain" />
+                        </View>
 
-                    {/* The Wheel */}
-                    <Animated.View style={[styles.wheelContainer, { transform: [{ rotate: spinRotate }] }]}>
-                        <LinearGradient
-                            colors={['#1a1a2e', '#16213e']}
-                            style={styles.wheelGradient}
-                        >
-                            {/* Decorative Segments */}
-                            <View style={styles.segmentsContainer}>
-                                {[...Array(SPIN_RESULTS.length)].map((_, i) => (
+                        {/* The Wheel */}
+                        <Animated.View style={[styles.wheelContainer, { transform: [{ rotate: spinRotate }] }]}>
+                            <View style={styles.wheelGradient}>
+                                {/* Decorative Segments */}
+                                <View style={styles.segmentsContainer}>
+                                    {[...Array(SPIN_RESULTS.length)].map((_, i) => (
+                                        <View
+                                            key={i}
+                                            style={[
+                                                styles.segment,
+                                                { transform: [{ rotate: `${i * (360 / SPIN_RESULTS.length)}deg` }] }
+                                            ]}
+                                        />
+                                    ))}
+                                </View>
+
+                                {/* Numbers */}
+                                {SPIN_RESULTS.map((val, i) => (
                                     <View
                                         key={i}
                                         style={[
-                                            styles.segment,
+                                            styles.numberWrapper,
                                             { transform: [{ rotate: `${i * (360 / SPIN_RESULTS.length)}deg` }] }
                                         ]}
-                                    />
+                                    >
+                                        <Text style={styles.wheelNumber}>{val}</Text>
+                                    </View>
                                 ))}
-                            </View>
 
-                            {/* Numbers */}
-                            {SPIN_RESULTS.map((val, i) => (
-                                <View
-                                    key={i}
-                                    style={[
-                                        styles.numberWrapper,
-                                        { transform: [{ rotate: `${i * (360 / SPIN_RESULTS.length)}deg` }] }
-                                    ]}
-                                >
-                                    <Text style={styles.wheelNumber}>{val}</Text>
+                                {/* Center Pin */}
+                                <View style={styles.centerPin}>
+                                    <View style={styles.innerPin} />
                                 </View>
-                            ))}
-
-                            {/* Center Pin */}
-                            <View style={styles.centerPin}>
-                                <View style={styles.innerPin} />
                             </View>
-                        </LinearGradient>
-                    </Animated.View>
-                </View>
-
-                <PremiumButton
-                    title={isSpinning ? "SPINNING..." : "SPIN NOW"}
-                    onPress={handleSpin}
-                    style={styles.spinButton}
-                    disabled={isSpinning}
-                />
-            </View>
-
-            <Modal transparent visible={modalVisible} animationType="zoom">
-                <View style={styles.modalOverlay}>
-                    <LinearGradient
-                        colors={['#1A1A2E', '#16213E']}
-                        style={styles.modalBox}
-                    >
-                        <View style={styles.rewardIconContainer}>
-                            <Ionicons name="sparkles" size={60} color={THEME.colors.secondary} />
-                        </View>
-                        <Text style={styles.congratsText}>Congratulations!</Text>
-                        <Text style={styles.wonText}>You won {reward} coins</Text>
-                        <PremiumButton
-                            title="CLAIM REWARD"
-                            onPress={handleClaim}
-                            style={{ width: '100%' }}
+                        </Animated.View>
+                        <Image
+                            source={require('../../assets/images/outer_boarder.png')}
+                            style={styles.outerBoarder}
+                            pointerEvents="none"
                         />
-                    </LinearGradient>
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.spinButton, isSpinning && styles.disabledButton]}
+                        onPress={handleSpin}
+                        disabled={isSpinning}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.spinButtonText}>
+                            {isSpinning ? "SPINNING..." : "SPIN NOW"}
+                        </Text>
+                    </TouchableOpacity>
+                    {/* Promo Image */}
+                    <TouchableOpacity
+                        activeOpacity={0.9}
+                        style={styles.promoContainer}
+                        onPress={openAdLink}
+                    >
+                        <Image
+                            source={require('../../assets/images/big_ad_img4.png')}
+                            style={styles.promoImage}
+                            resizeMode="stretch"
+                        />
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+
+            <Modal transparent visible={modalVisible} animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalBox}>
+                        <View style={styles.rewardIconContainer}>
+                            <Image source={require('../../assets/images/ic_daily_rbx.png')} style={styles.trofee} resizeMode="contain" />
+                            <Text style={styles.rewardNumber}>{reward}</Text>
+                        </View>
+                        <Text style={styles.congratsDescription}>
+                            Congratulations ! {reward} RBX Coins are added to your virtual balance.
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.okayButton}
+                            onPress={handleClaim}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.okayButtonText}>Okay</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </Modal>
         </SafeAreaView>
@@ -177,6 +251,7 @@ const SpinWheel = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#000',
     },
     header: {
         flexDirection: 'row',
@@ -197,6 +272,23 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FFF',
     },
+    coinContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    coinIcon: {
+        width: 18,
+        height: 18,
+        marginRight: 6,
+    },
+    coinText: {
+        color: '#FFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     content: {
         flex: 1,
         alignItems: 'center',
@@ -207,20 +299,35 @@ const styles = StyleSheet.create({
         height: width * 0.85,
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 50,
         marginBottom: 50,
     },
     pointerContainer: {
         position: 'absolute',
-        top: -20,
-        zIndex: 10,
+        top: -45,
+        zIndex: 20,
+        alignItems: 'center',
+    },
+    pointerImage: {
+        width: 45,
+        height: 60,
     },
     wheelContainer: {
         width: '100%',
         height: '100%',
-        borderRadius: width * 0.425,
-        borderWidth: 8,
-        borderColor: 'rgba(142, 45, 226, 0.3)',
-        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    wheelImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
+    },
+    outerBoarder: {
+        position: 'absolute',
+        width: width * 0.9,
+        height: width * 0.9,
+        zIndex: 15,
     },
     wheelGradient: {
         flex: 1,
@@ -270,6 +377,35 @@ const styles = StyleSheet.create({
     },
     spinButton: {
         width: width * 0.7,
+        backgroundColor: '#A020F0',
+        paddingVertical: 15,
+        borderRadius: 40,
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#A020F0',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    disabledButton: {
+        opacity: 0.6,
+    },
+    spinButtonText: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+    },
+    promoContainer: {
+        marginVertical: 25,
+        width: '100%',
+        alignSelf: 'center',
+        justifyContent: 'center'
+    },
+    promoImage: {
+        width: width,
+        height: 270,
+        borderRadius: 15,
     },
     modalOverlay: {
         flex: 1,
@@ -279,27 +415,55 @@ const styles = StyleSheet.create({
         padding: THEME.spacing.xl,
     },
     modalBox: {
-        width: '100%',
-        borderRadius: THEME.borderRadius.xl,
-        padding: THEME.spacing.xl,
+        width: '95%',
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 30,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 2,
+        borderColor: '#FFF',
+        backgroundColor: '#1E0B36', // Dark purple background
     },
     rewardIconContainer: {
+        width: 180,
+        height: 180,
+        justifyContent: 'center',
+        alignItems: 'center',
         marginBottom: 20,
     },
-    congratsText: {
+    trofee: {
+        width: '100%',
+        height: '100%',
+    },
+    rewardNumber: {
+        position: 'absolute',
+        bottom: 45,
         color: '#FFF',
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
     },
-    wonText: {
-        color: THEME.colors.secondary,
-        fontSize: 20,
-        fontWeight: '600',
+    congratsDescription: {
+        color: '#FFF',
+        fontSize: 15,
+        textAlign: 'center',
+        lineHeight: 22,
         marginBottom: 30,
+        fontWeight: '500',
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    okayButton: {
+        backgroundColor: '#A020F0', // Vibrant purple
+        paddingVertical: 15,
+        paddingHorizontal: 60,
+        borderRadius: 40,
+        width: '100%',
+        alignItems: 'center',
+    },
+    okayButtonText: {
+        color: '#FFF',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
 });
 

@@ -1,15 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Pressable, StatusBar, Modal } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Pressable, StatusBar, Modal, useWindowDimensions } from "react-native";
 import InAppBrowser from "react-native-inappbrowser-reborn";
 import { getRedirectUrl } from "../../utils/remoteConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
+import LinearGradient from "react-native-linear-gradient";
+
 
 const Dashboard = () => {
 
     const navigation = useNavigation();
-
+    const { width } = useWindowDimensions();
     const [coins, setCoins] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
     const [alreadyClaimedModal, setAlreadyClaimedModal] = useState(false);
@@ -115,7 +117,7 @@ const Dashboard = () => {
 
             const url = getRedirectUrl();
             await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close  ',
+                dismissButtonStyle: 'close',
                 preferredBarTintColor: '#f78c2c',
                 preferredControlTintColor: 'white',
                 readerMode: false,
@@ -137,7 +139,7 @@ const Dashboard = () => {
         const url = getRedirectUrl();
         try {
             await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close  ',
+                dismissButtonStyle: 'close',
                 preferredBarTintColor: '#f78c2c',
                 preferredControlTintColor: 'white',
                 readerMode: false,
@@ -158,7 +160,7 @@ const Dashboard = () => {
 
         try {
             await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close  ',
+                dismissButtonStyle: 'close',
                 preferredBarTintColor: '#f78c2c',
                 preferredControlTintColor: 'white',
                 readerMode: false,
@@ -180,117 +182,155 @@ const Dashboard = () => {
 
     return (
         <SafeAreaView style={styles.container} >
-            <StatusBar barStyle="light-content" backgroundColor="#000000" />
+            {/* <StatusBar barStyle="light-content" backgroundColor="#000000" /> */}
             {/* Header */}
-            <View style={styles.header}>
+            <LinearGradient
+                colors={['#1a1a2e', 'rgba(26, 26, 46, 0.8)']}
+                style={styles.header}
+            >
                 <View>
                     <Text style={styles.headerTitle}>Get Daily Rbux</Text>
                     <Text style={styles.headerSubtitle}>Counters & RBC Calc</Text>
                 </View>
-                <View style={styles.coinContainer}>
+                <LinearGradient
+                    colors={['#f78c2c', '#e94057']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.coinContainer}
+                >
                     <Image
                         source={require('../../assets/images/coin.png')}
                         style={styles.coinIcon}
                         resizeMode="contain"
                     />
                     <Text style={styles.coinText}>{coins}</Text>
-                </View>
-            </View>
+                </LinearGradient>
+            </LinearGradient>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 45 }}>
                 {/* Daily Converter Card */}
-                <Pressable style={styles.converterCard} onPress={() => handleAdThenNavigate('Rblxcalc')}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={styles.converterCard}
+                    onPress={() => handleAdThenNavigate('Rblxcalc')}
+                >
                     <Image
-                        source={require('../../assets/images/daily_converter.png')}
-                        style={styles.converterImage}
-                        resizeMode="contain"
+                        source={require('../../assets/images/daily_rbx_main.png')}
+                        style={styles.converterImageMain}
+                        resizeMode="stretch"
                     />
-                </Pressable>
+                </TouchableOpacity>
 
                 {/* Promo Image */}
-                <Pressable style={styles.promoContainer} onPress={openAdLink}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={styles.promoContainer}
+                    onPress={openAdLink}
+                >
                     <Image
                         source={require('../../assets/images/big_ad_img5.png')}
                         style={styles.promoImage}
-                        resizeMode="cover"
+                        resizeMode="stretch"
                     />
-                </Pressable>
+                </TouchableOpacity>
 
                 {/* ---------- ROW 1 ---------- */}
                 <View style={styles.row}>
-                    <Pressable style={styles.tile} onPress={handleDailyReward}>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.tile}
+                        onPress={handleDailyReward}
+                        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                    >
                         <Image
-                            source={require('../../assets/images/daily_rbx.png')}
+                            source={require('../../assets/images/ic_today_claim.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
 
-                    <Pressable style={styles.tile} onPress={() => handleAdThenNavigate('Spin')}>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.tile}
+                        onPress={() => handleAdThenNavigate('Spin')}
+                        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                    >
                         <Image
-                            source={require('../../assets/images/spin_wheel.png')}
+                            source={require('../../assets/images/ic_spinner.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
 
                 {/* ---------- ROW 2 ---------- */}
                 <View style={styles.row}>
-                    <Pressable style={styles.tile} onPress={() => handleAdThenNavigate('Luckyscratch')}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Luckyscratch')}>
                         <Image
-                            source={require('../../assets/images/scratch_card_main.png')}
+                            source={require('../../assets/images/ic_scrapper_main.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
 
-                    <Pressable style={styles.tile} onPress={() => handleAdThenNavigate('Quiz')}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Quiz')}>
                         <Image
-                            source={require('../../assets/images/logic_quize_time.png')}
+                            source={require('../../assets/images/quiz_main.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
 
                 {/* ---------- ROW 3 ---------- */}
                 <View style={styles.row}>
-                    <Pressable style={styles.tile} onPress={() => handleAdThenNavigate('Redemaccount')}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Redemaccount')}>
                         <Image
-                            source={require('../../assets/images/redeem_coin.png')}
+                            source={require('../../assets/images/ic_refer_main.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
 
-                    <Pressable style={styles.tile} onPress={() => handleAdThenNavigate('Memesfun')}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Memesfun')}>
                         <Image
-                            source={require('../../assets/images/meme_fun.png')}
+                            source={require('../../assets/images/meme.png')}
                             style={styles.tileImage}
                             resizeMode="contain"
                         />
-                    </Pressable>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Promo Image */}
-                <Pressable style={styles.promoContainer} onPress={openAdLink}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={styles.promoContainer}
+                    onPress={openAdLink}
+                >
                     <Image
                         source={require('../../assets/images/big_ad_img4.png')}
                         style={styles.promoImage}
-                        resizeMode="cover"
+                        resizeMode="stretch"
                     />
-                </Pressable>
+                </TouchableOpacity>
+                <View style={styles.row}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('BCRobuxAmount', { type: 'dollarToRbx' })}>
+                        <Image
+                            source={require('../../assets/images/img_dollar_rbx_main.png')}
+                            style={styles.tileImage}
+                            resizeMode="contain"
+                        />
+                    </TouchableOpacity>
 
-                <View style={{ marginTop: 15 }}>
-                    <Pressable style={styles.convertbox} onPress={() => handleAdThenNavigate('BCRobuxAmount', { type: 'dollarToRbx' })}>
-                        <Image source={require('../../assets/images/dollar_rbx.png')} resizeMode="contain" style={styles.convertimage} />
-                    </Pressable>
-
-                    <Pressable style={styles.convertbox} onPress={() => handleAdThenNavigate('BCRobuxAmount', { type: 'rbxToDollar' })}>
-                        <Image source={require('../../assets/images/rbx_dollar.png')} resizeMode="contain" style={styles.convertimage} />
-                    </Pressable>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('BCRobuxAmount', { type: 'rbxToDollar' })}>
+                        <Image
+                            source={require('../../assets/images/img_rbx_dollar_main.png')}
+                            style={styles.tileImage}
+                            resizeMode="contain"
+                        />
+                    </TouchableOpacity>
                 </View>
+
 
             </ScrollView>
 
@@ -346,14 +386,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#000000",
-        paddingHorizontal: 16,
+        // paddingHorizontal: 16,
         paddingTop: 20,
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 20,
+        padding: 10,
     },
     headerTitle: {
         fontSize: 17,
@@ -368,7 +408,6 @@ const styles = StyleSheet.create({
     coinContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#1F1F1F",
         paddingHorizontal: 18,
         paddingVertical: 10,
         borderRadius: 20,
@@ -385,25 +424,23 @@ const styles = StyleSheet.create({
     },
     converterCard: {
         width: '100%',
-        height: 120,
-        marginBottom: 20,
-        justifyContent: 'center',
-        alignItems: "center"
+        height: 200,
+        marginTop: 10,
+        marginBottom: 10,
     },
-    converterImage: {
+    converterImageMain: {
         width: '100%',
         height: '100%',
-        justifyContent: "center"
     },
     promoContainer: {
-        marginVertical: 10,
         width: '100%',
         alignSelf: 'center',
+        marginVertical: 15,
     },
     promoImage: {
-        width: '98%',
+        width: '100%',
         height: 250,
-        borderRadius: 5,
+        borderRadius: 15,
     },
     row: {
         flexDirection: 'row',
@@ -411,11 +448,11 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     tile: {
-        width: '48%',
+        width: '48.5%',
         aspectRatio: 1.1,
-        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
     },
     tileImage: {
         width: '100%',
