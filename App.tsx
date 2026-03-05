@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -13,10 +13,16 @@ import SpinWheel from './src/screens/Games/SpinWheel';
 import RedeemScreen from './src/screens/Utility/RedeemScreen';
 import MemesScreen from './src/screens/Utility/MemesScreen';
 import ClothesScreen from './src/screens/Utility/ClothesScreen';
+import { initRemoteConfig } from './src/utils/remoteConfig';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
+
+  useEffect(() => {
+    initRemoteConfig();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -30,7 +36,7 @@ function App() {
         <Stack.Screen name="Spin" component={SpinWheel} />
         <Stack.Screen name="Redemaccount" component={RedeemScreen} />
         <Stack.Screen name="Memesfun" component={MemesScreen} />
-        <Stack.Screen name="Clothesselect" component={ClothesScreen} />
+        {/* <Stack.Screen name="Clothesselect" component={ClothesScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -17,7 +17,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import PremiumButton from '../../components/PremiumButton';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -51,12 +51,16 @@ const SpinWheel = ({ navigation }) => {
         if (isSpinning) return;
 
         setIsSpinning(true);
-        const randomResult = Math.floor(Math.random() * SPIN_RESULTS.length);
-        const resultValue = SPIN_RESULTS[randomResult];
+        const winnerIndex = Math.floor(Math.random() * SPIN_RESULTS.length);
+        const resultValue = SPIN_RESULTS[winnerIndex];
+
+        // Calculate the rotation needed to bring winnerIndex to the top (0 degrees)
+        const segmentAngle = 360 / SPIN_RESULTS.length;
+        const winnerRotation = (360 - (winnerIndex * segmentAngle)) % 360;
 
         // 5 full rotations + final position
         const rotationCount = 5;
-        const finalValue = (rotationCount * 360) + (randomResult * (360 / SPIN_RESULTS.length));
+        const finalValue = (rotationCount * 360) + winnerRotation;
 
         spinAnim.setValue(0);
         Animated.timing(spinAnim, {
@@ -74,49 +78,73 @@ const SpinWheel = ({ navigation }) => {
     };
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };
     // set the ads
     const openAdLink = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close  ',
-                preferredBarTintColor: '#f78c2c',
-                preferredControlTintColor: 'white',
-                readerMode: false,
-                showTitle: true,
-                toolbarColor: '#f78c2c',
-                secondaryToolbarColor: 'white',
-                enableUrlBarHiding: true,
-                enableDefaultShare: true,
-                forceCloseOnRedirection: false,
-            });
-        } catch (e) {
-            console.log('Browser closed or error', e);
+        const configData = getRemoteConfigData();
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                await InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: '#f78c2c',
+                    preferredControlTintColor: 'white',
+                    readerMode: false,
+                    showTitle: true,
+                    toolbarColor: '#f78c2c',
+                    secondaryToolbarColor: 'white',
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: true,
+                    forceCloseOnRedirection: false,
+                });
+            } catch (e) {
+                console.log('Browser closed or error', e);
+            }
         }
     };
 
     const handleClaim = async () => {
         setModalVisible(false);
-        const url = getRedirectUrl();
+        const rewardAmount = parseInt(reward) || 0;
+
         try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
-        } catch (e) {
-            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
+            // Update coins locally in state and storage
+            const newCoins = coins + rewardAmount;
+            setCoins(newCoins);
+            await AsyncStorage.setItem("user_coins", newCoins.toString());
+            console.log("✅ Coins updated locally in SpinWheel:", newCoins);
+        } catch (error) {
+            console.log("❌ Error updating coins in SpinWheel:", error);
+        }
+
+        const configData = getRemoteConfigData();
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                // Just open the browser, don't navigate
+                InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                console.log("InAppBrowser Error:", e);
+            }
         }
     };
 

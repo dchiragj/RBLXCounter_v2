@@ -13,7 +13,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import PremiumButton from '../../components/PremiumButton';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -32,27 +32,39 @@ const ClothesScreen = ({ navigation }) => {
     const [selectedId, setSelectedId] = useState(1);
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };
 
     const handleNext = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                navigation.goBack();
+                InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };

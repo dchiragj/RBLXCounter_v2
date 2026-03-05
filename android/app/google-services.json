@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "139086301342",
+    "project_id": "rblxcounterv2",
+    "storage_bucket": "rblxcounterv2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139086301342:android:878df0cadd918368a8d38f",
+        "android_client_info": {
+          "package_name": "com.rblxcounterv2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxT8u75XsqUwARMCzEbSIK4ueN7d8iD60"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

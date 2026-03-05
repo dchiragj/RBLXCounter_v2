@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 const { width } = Dimensions.get('window');
@@ -151,14 +151,20 @@ const QuizScreen = ({ navigation }) => {
     };
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };

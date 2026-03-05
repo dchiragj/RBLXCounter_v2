@@ -16,7 +16,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 const { width } = Dimensions.get('window');
@@ -63,29 +63,54 @@ const LuckyScratch = ({ navigation }) => {
     };
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };
 
     const handleClaim = async () => {
         setModalVisible(false);
-        const url = getRedirectUrl();
+        const rewardAmount = parseInt(reward) || 0;
+
         try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
-        } catch (e) {
-            navigation.navigate('Dashboard', { spinReward: parseInt(reward) });
+            // Update coins locally in state and storage
+            const newCoins = coins + rewardAmount;
+            setCoins(newCoins);
+            await AsyncStorage.setItem("user_coins", newCoins.toString());
+            console.log("✅ Coins updated locally in LuckyScratch:", newCoins);
+        } catch (error) {
+            console.log("❌ Error updating coins in LuckyScratch:", error);
+        }
+
+        // Reset scratch card for next play
+        setIsScratched(false);
+        scratchAnim.setValue(1);
+
+        const configData = getRemoteConfigData();
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                // Just open the browser, don't navigate
+                InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                console.log("InAppBrowser Error:", e);
+            }
         }
     };
 
@@ -155,7 +180,12 @@ const LuckyScratch = ({ navigation }) => {
                 {!isScratched && (
                     <TouchableOpacity
                         style={styles.promoContainer}
-                        onPress={() => InAppBrowser.open(getRedirectUrl())}
+                        onPress={() => {
+                            const config = getRemoteConfigData();
+                            if (config?.show_ads?.enable) {
+                                InAppBrowser.open(config.show_ads.url);
+                            }
+                        }}
                     >
                         <Image
                             source={require('../../assets/images/big_ad_img5.png')}

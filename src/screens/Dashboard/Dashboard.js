@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Pressable, StatusBar, Modal, useWindowDimensions } from "react-native";
 import InAppBrowser from "react-native-inappbrowser-reborn";
-import { getRedirectUrl } from "../../utils/remoteConfig";
+import { getRemoteConfigData } from "../../utils/remoteConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LinearGradient from "react-native-linear-gradient";
 
@@ -115,19 +115,22 @@ const Dashboard = () => {
             setModalVisible(false);
 
 
-            const url = getRedirectUrl();
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: '#f78c2c',
-                preferredControlTintColor: 'white',
-                readerMode: false,
-                showTitle: true,
-                toolbarColor: '#f78c2c',
-                secondaryToolbarColor: 'white',
-                enableUrlBarHiding: true,
-                enableDefaultShare: true,
-                forceCloseOnRedirection: false,
-            });
+            const configData = getRemoteConfigData();
+            if (configData?.show_ads?.enable) {
+                const url = configData.show_ads.url;
+                await InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: '#f78c2c',
+                    preferredControlTintColor: 'white',
+                    readerMode: false,
+                    showTitle: true,
+                    toolbarColor: '#f78c2c',
+                    secondaryToolbarColor: 'white',
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: true,
+                    forceCloseOnRedirection: false,
+                });
+            }
 
         } catch (error) {
             console.log("Error in handleAddNow:", error);
@@ -136,46 +139,52 @@ const Dashboard = () => {
 
     // set the all click event on ads
     const openAdLink = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: '#f78c2c',
-                preferredControlTintColor: 'white',
-                readerMode: false,
-                showTitle: true,
-                toolbarColor: '#f78c2c',
-                secondaryToolbarColor: 'white',
-                enableUrlBarHiding: true,
-                enableDefaultShare: true,
-                forceCloseOnRedirection: false,
-            });
-        } catch (e) {
-            console.log('Browser closed or error', e);
+        const configData = getRemoteConfigData();
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                await InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: '#f78c2c',
+                    preferredControlTintColor: 'white',
+                    readerMode: false,
+                    showTitle: true,
+                    toolbarColor: '#f78c2c',
+                    secondaryToolbarColor: 'white',
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: true,
+                    forceCloseOnRedirection: false,
+                });
+            } catch (e) {
+                console.log('Browser closed or error', e);
+            }
         }
     };
 
     const handleAdThenNavigate = async (screenName, params = {}) => {
-        const url = getRedirectUrl();
+        const configData = getRemoteConfigData();
 
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: '#f78c2c',
-                preferredControlTintColor: 'white',
-                readerMode: false,
-                showTitle: true,
-                toolbarColor: '#f78c2c',
-                secondaryToolbarColor: 'white',
-                enableUrlBarHiding: true,
-                enableDefaultShare: true,
-                forceCloseOnRedirection: false,
-            });
-
-            navigation.navigate(screenName, params);
-
-        } catch (e) {
-            console.log("InAppBrowser Error:", e);
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                navigation.navigate(screenName, params);
+                InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: '#f78c2c',
+                    preferredControlTintColor: 'white',
+                    readerMode: false,
+                    showTitle: true,
+                    toolbarColor: '#f78c2c',
+                    secondaryToolbarColor: 'white',
+                    enableUrlBarHiding: true,
+                    enableDefaultShare: true,
+                    forceCloseOnRedirection: false,
+                });
+            } catch (e) {
+                console.log("InAppBrowser Error:", e);
+                // navigation.navigate(screenName, params); // Already navigated
+            }
+        } else {
             navigation.navigate(screenName, params);
         }
     };
@@ -387,7 +396,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#000000",
         // paddingHorizontal: 16,
-        paddingTop: 20,
+        // paddingTop: 20,
     },
     header: {
         flexDirection: "row",

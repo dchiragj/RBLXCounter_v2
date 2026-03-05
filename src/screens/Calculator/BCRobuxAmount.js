@@ -14,7 +14,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import PremiumButton from '../../components/PremiumButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -57,27 +57,37 @@ const BCRobuxAmount = ({ route, navigation }) => {
 
     const handleContinue = async () => {
         setShowModal(false);
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-                preferredControlTintColor: 'white',
-            });
-        } catch (e) {
-            console.log('Browser error', e);
+        const configData = getRemoteConfigData();
+
+        if (configData?.show_ads?.enable) {
+            const url = configData.show_ads.url;
+            try {
+                InAppBrowser.open(url, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                    preferredControlTintColor: 'white',
+                });
+            } catch (e) {
+                console.log('Browser error', e);
+            }
         }
     };
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };
@@ -99,7 +109,7 @@ const BCRobuxAmount = ({ route, navigation }) => {
                 <View style={styles.iconContainer}>
                     {(type === 'dollarToRbx' || type === 'rbxToDollar') ? (
                         <Image
-                            source={require('../../assets/images/calc_img.png')}
+                            source={require('../../assets/images/calcuimage.png')}
                             style={styles.calcImage}
                             resizeMode="contain"
                         />

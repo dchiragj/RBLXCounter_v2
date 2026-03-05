@@ -12,7 +12,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { THEME } from '../../theme';
-import { getRedirectUrl } from '../../utils/remoteConfig';
+import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,14 +30,20 @@ const MEME_DATA = [
 const MemesScreen = ({ navigation }) => {
 
     const handleBackPress = async () => {
-        const url = getRedirectUrl();
-        try {
-            await InAppBrowser.open(url, {
-                dismissButtonStyle: 'close',
-                preferredBarTintColor: THEME.colors.primary,
-            });
-            navigation.goBack();
-        } catch (e) {
+        const configData = getRemoteConfigData();
+        const backscreen = configData?.backscreen;
+
+        if (backscreen?.enable) {
+            try {
+                navigation.goBack();
+                InAppBrowser.open(backscreen.backurl, {
+                    dismissButtonStyle: 'close',
+                    preferredBarTintColor: THEME.colors.primary,
+                });
+            } catch (e) {
+                // navigation.goBack(); // Already gone back
+            }
+        } else {
             navigation.goBack();
         }
     };
@@ -97,7 +103,12 @@ const MemesScreen = ({ navigation }) => {
                 {/* Promo Image */}
                 <TouchableOpacity
                     style={styles.promoContainer}
-                    onPress={() => InAppBrowser.open(getRedirectUrl())}
+                    onPress={() => {
+                        const config = getRemoteConfigData();
+                        if (config?.show_ads?.enable) {
+                            InAppBrowser.open(config.show_ads.url);
+                        }
+                    }}
                 >
                     <Image
                         source={require('../../assets/images/big_ad_img2.png')}
