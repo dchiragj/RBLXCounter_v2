@@ -32,7 +32,6 @@ const Rblxcalc = ({ navigation }) => {
                     toolbarColor: THEME.colors.primary,
                 });
             } catch (e) {
-                // navigation.navigate(screenName, params); // Already navigated
             }
         } else {
             navigation.navigate(screenName, params);
@@ -76,7 +75,6 @@ const Rblxcalc = ({ navigation }) => {
                     toolbarColor: THEME.colors.primary,
                 });
             } catch (e) {
-                // navigation.goBack(); // Already gone back
             }
         } else {
             navigation.goBack();
@@ -88,7 +86,6 @@ const Rblxcalc = ({ navigation }) => {
             <StatusBar barStyle="light-content" />
             <LinearGradient colors={THEME.gradients.background} style={StyleSheet.absoluteFill} />
 
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
                     <Ionicons name="chevron-back" size={28} color="#FFF" />
@@ -114,7 +111,6 @@ const Rblxcalc = ({ navigation }) => {
                         />
                     </TouchableOpacity>
                 </View>
-                {/* Promo Image */}
                 <TouchableOpacity
                     activeOpacity={0.9}
                     style={styles.promoContainer}
@@ -141,33 +137,8 @@ const Rblxcalc = ({ navigation }) => {
                             resizeMode="contain"
                         />
                     </TouchableOpacity>
-                    {/* <FeatureCard
-                        title="Daily Counter"
-                        subtitle="Calculate rewards"
-                        image={require('../../assets/images/daily_free_rbx.png')}
-                        onPress={() => navigation.navigate('Selectcalculator')}
-                    />
-                    <FeatureCard
-                        title="RBX to Dollar"
-                        subtitle="Check value"
-                        image={require('../../assets/images/rbx_to_dollar.png')}
-                        onPress={() => navigation.navigate('BCRobuxAmount', { type: 'rbxToDollar' })}
-                    />
-                    <FeatureCard
-                        title="Dollar to RBX"
-                        subtitle="Check amount"
-                        image={require('../../assets/images/dollar_to_rbx.png')}
-                        onPress={() => navigation.navigate('BCRobuxAmount', { type: 'dollarToRbx' })}
-                    />
-                    <FeatureCard
-                        title="Robux Converter"
-                        subtitle="Quick conversion"
-                        image={require('../../assets/images/daily_converter.png')}
-                        onPress={() => navigation.navigate('BCRobuxAmount', { type: 'dollarToRbx' })}
-                    /> */}
                 </View>
 
-                {/* Info Card */}
                 <LinearGradient
                     colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
                     style={styles.infoCard}

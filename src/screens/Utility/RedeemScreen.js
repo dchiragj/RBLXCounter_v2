@@ -157,9 +157,10 @@ const styles = StyleSheet.create({
         color: '#FFF',
     },
     scrollContent: {
-        padding: THEME.spacing.lg,
+        // padding: THEME.spacing.lg,
     },
     walletCard: {
+        // paddingHorizontal: THEME.spacing.lg,
         marginVertical: THEME.spacing.xl,
         borderRadius: THEME.borderRadius.xl,
         overflow: 'hidden',

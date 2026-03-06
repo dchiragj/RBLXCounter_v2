@@ -111,7 +111,7 @@ const MemesScreen = ({ navigation }) => {
                     }}
                 >
                     <Image
-                        source={require('../../assets/images/big_ad_img2.png')}
+                        source={require('../../assets/images/big_ad_img3.png')}
                         style={styles.promoImage}
                         resizeMode="cover"
                     />

@@ -139,7 +139,7 @@ const LuckyScratch = ({ navigation }) => {
             </LinearGradient>
 
             <View style={styles.content}>
-                <Text style={styles.instruction}>Scratch the card to reveal your prize!</Text>
+                {/* <Text style={styles.instruction}>Scratch the card to reveal your prize!</Text> */}
 
                 <View style={styles.cardContainer}>
                     {/* Reward Layer (Revealed) */}

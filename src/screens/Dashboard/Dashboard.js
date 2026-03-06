@@ -15,7 +15,7 @@ const Dashboard = () => {
     const [coins, setCoins] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
     const [alreadyClaimedModal, setAlreadyClaimedModal] = useState(false);
-    const [todayReward, setTodayReward] = useState(20);  // dynamic
+    const [todayReward, setTodayReward] = useState(20);
     const [claimedToday, setClaimedToday] = useState(false);
 
     useEffect(() => {
@@ -30,7 +30,6 @@ const Dashboard = () => {
 
             if (currentRoute.params?.spinReward) {
                 handleSpinReward(currentRoute.params.spinReward);
-                // Clear the params
                 navigation.setParams({ spinReward: undefined });
             }
         });
@@ -41,7 +40,6 @@ const Dashboard = () => {
     const loadCoins = async () => {
         try {
             const savedCoins = await AsyncStorage.getItem("user_coins");
-            console.log("💰 Loaded coins from storage:", savedCoins);
             if (savedCoins) {
                 const coinsValue = parseInt(savedCoins);
                 setCoins(coinsValue);
@@ -137,7 +135,6 @@ const Dashboard = () => {
         }
     };
 
-    // set the all click event on ads
     const openAdLink = async () => {
         const configData = getRemoteConfigData();
         if (configData?.show_ads?.enable) {
@@ -191,7 +188,6 @@ const Dashboard = () => {
 
     return (
         <SafeAreaView style={styles.container} >
-            {/* <StatusBar barStyle="light-content" backgroundColor="#000000" /> */}
             {/* Header */}
             <LinearGradient
                 colors={['#1a1a2e', 'rgba(26, 26, 46, 0.8)']}
@@ -217,7 +213,6 @@ const Dashboard = () => {
             </LinearGradient>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 45 }}>
-                {/* Daily Converter Card */}
                 <TouchableOpacity
                     activeOpacity={0.9}
                     style={styles.converterCard}
@@ -243,7 +238,6 @@ const Dashboard = () => {
                     />
                 </TouchableOpacity>
 
-                {/* ---------- ROW 1 ---------- */}
                 <View style={styles.row}>
                     <TouchableOpacity
                         activeOpacity={0.7}
@@ -272,7 +266,6 @@ const Dashboard = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* ---------- ROW 2 ---------- */}
                 <View style={styles.row}>
                     <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Luckyscratch')}>
                         <Image
@@ -291,7 +284,6 @@ const Dashboard = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* ---------- ROW 3 ---------- */}
                 <View style={styles.row}>
                     <TouchableOpacity activeOpacity={0.8} style={styles.tile} onPress={() => handleAdThenNavigate('Redemaccount')}>
                         <Image
@@ -344,7 +336,6 @@ const Dashboard = () => {
             </ScrollView>
 
 
-            {/* DAILY REWARD MODAL */}
             <Modal visible={modalVisible} transparent animationType="fade">
                 <View style={styles.modalMain}>
                     <View style={styles.modalBox}>
@@ -364,7 +355,6 @@ const Dashboard = () => {
                 </View>
             </Modal>
 
-            {/* ALREADY CLAIMED MODAL */}
             <Modal visible={alreadyClaimedModal} transparent animationType="fade">
                 <View style={styles.modalMain}>
                     <View style={styles.modalBox}>
@@ -395,8 +385,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#000000",
-        // paddingHorizontal: 16,
-        // paddingTop: 20,
     },
     header: {
         flexDirection: "row",

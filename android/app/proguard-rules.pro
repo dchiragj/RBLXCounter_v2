@@ -9,18 +9,16 @@
 
 # Add any project specific keep options here:
 
-# Firebase ProGuard rules
+# Firebase
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**
-
-# React Native InAppBrowser ProGuard rules
--keep class com.proyecto26.inappbrowser.** { *; }
-
-# General React Native ProGuard rules
--keep class com.facebook.react.bridge.CatalystInstanceImpl { *; }
--keep class com.facebook.react.bridge.JavaScriptExecutor { *; }
--keep class com.facebook.react.bridge.ReactContext { *; }
--keep class com.facebook.react.uimanager.ViewManager { *; }
--keep class com.facebook.react.uimanager.events.Event { *; }
+ 
+# Remote Config
 -keep class com.google.firebase.remoteconfig.** { *; }
--dontwarn com.google.firebase.remoteconfig.**
+ 
+# InAppBrowser
+-keep class com.proyecto26.inappbrowser.** { *; }
+ 
+# React Native
+-keep class com.facebook.react.** { *; }
+-dontwarn com.facebook.react.**

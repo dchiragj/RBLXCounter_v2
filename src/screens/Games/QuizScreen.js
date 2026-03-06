@@ -102,7 +102,6 @@ const QuizScreen = ({ navigation }) => {
 
         setTimeout(() => {
             if (currentQIndex < currentQuestions.length - 1) {
-                // Next Question
                 Animated.timing(fadeAnim, {
                     toValue: 0,
                     duration: 300,
@@ -118,7 +117,6 @@ const QuizScreen = ({ navigation }) => {
                     }).start();
                 });
             } else {
-                // End of Level
                 setShowResultModal(true);
             }
         }, 1500);
@@ -186,14 +184,6 @@ const QuizScreen = ({ navigation }) => {
                     <Text style={styles.scoreText}>{score}/{currentQuestions.length}</Text>
                 </View>
             </LinearGradient>
-
-            {/* <View style={styles.bannerContainer}>
-                <Image
-                    source={require('../../assets/images/quize_time.png')}
-                    style={styles.bannerImage}
-                    resizeMode="contain"
-                />
-            </View> */}
 
             <View style={styles.levelProgressContainer}>
                 <Text style={styles.levelText}>Level {currentLevel}</Text>

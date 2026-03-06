@@ -69,7 +69,6 @@ const SpinWheel = ({ navigation }) => {
             useNativeDriver: true,
         }).start(({ finished }) => {
             if (finished) {
-                console.log("🎡 Spin finished! Result:", resultValue);
                 setReward(resultValue);
                 setModalVisible(true);
                 setIsSpinning(false);
@@ -95,7 +94,6 @@ const SpinWheel = ({ navigation }) => {
             navigation.goBack();
         }
     };
-    // set the ads
     const openAdLink = async () => {
         const configData = getRemoteConfigData();
         if (configData?.show_ads?.enable) {
@@ -137,7 +135,6 @@ const SpinWheel = ({ navigation }) => {
         if (configData?.show_ads?.enable) {
             const url = configData.show_ads.url;
             try {
-                // Just open the browser, don't navigate
                 InAppBrowser.open(url, {
                     dismissButtonStyle: 'close',
                     preferredBarTintColor: THEME.colors.primary,
@@ -149,7 +146,7 @@ const SpinWheel = ({ navigation }) => {
     };
 
     const spinRotate = spinAnim.interpolate({
-        inputRange: [0, 360 * 10], // Support multiple rotations
+        inputRange: [0, 360 * 10],
         outputRange: ['0deg', '3600deg'],
     });
 
@@ -180,15 +177,12 @@ const SpinWheel = ({ navigation }) => {
 
                 <View style={styles.content}>
                     <View style={styles.wheelWrapper}>
-                        {/* Pointer */}
                         <View style={styles.pointerContainer}>
                             <Image source={require('../../assets/images/spin_point.png')} style={styles.pointerImage} resizeMode="contain" />
                         </View>
 
-                        {/* The Wheel */}
                         <Animated.View style={[styles.wheelContainer, { transform: [{ rotate: spinRotate }] }]}>
                             <View style={styles.wheelGradient}>
-                                {/* Decorative Segments */}
                                 <View style={styles.segmentsContainer}>
                                     {[...Array(SPIN_RESULTS.length)].map((_, i) => (
                                         <View
@@ -201,7 +195,6 @@ const SpinWheel = ({ navigation }) => {
                                     ))}
                                 </View>
 
-                                {/* Numbers */}
                                 {SPIN_RESULTS.map((val, i) => (
                                     <View
                                         key={i}
@@ -214,7 +207,6 @@ const SpinWheel = ({ navigation }) => {
                                     </View>
                                 ))}
 
-                                {/* Center Pin */}
                                 <View style={styles.centerPin}>
                                     <View style={styles.innerPin} />
                                 </View>
@@ -237,7 +229,6 @@ const SpinWheel = ({ navigation }) => {
                             {isSpinning ? "SPINNING..." : "SPIN NOW"}
                         </Text>
                     </TouchableOpacity>
-                    {/* Promo Image */}
                     <TouchableOpacity
                         activeOpacity={0.9}
                         style={styles.promoContainer}
@@ -272,7 +263,7 @@ const SpinWheel = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 

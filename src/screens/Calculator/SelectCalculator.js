@@ -31,7 +31,6 @@ const SelectCalculator = ({ navigation }) => {
                     toolbarColor: THEME.colors.primary,
                 });
             } catch (error) {
-                // navigation.navigate('BCRobuxAmount', { type }); // Already navigated
             }
         } else {
             navigation.navigate('BCRobuxAmount', { type });
@@ -53,7 +52,6 @@ const SelectCalculator = ({ navigation }) => {
                     toolbarColor: THEME.colors.primary,
                 });
             } catch (e) {
-                // navigation.goBack(); // Already gone back
             }
         } else {
             navigation.goBack();
