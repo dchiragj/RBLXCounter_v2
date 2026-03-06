@@ -7,6 +7,7 @@ import {
     StatusBar,
     ScrollView,
     Image,
+    Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -14,6 +15,8 @@ import { THEME } from '../../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getRemoteConfigData } from '../../utils/remoteConfig';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+
+const { width } = Dimensions.get('window');
 
 const RedeemScreen = ({ navigation }) => {
 
@@ -239,8 +242,8 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255,255,255,0.1)',
     },
     promoImage: {
-        width: '100%',
-        height: 200,
+        width: width,
+        height: 270,
     },
 });
 
